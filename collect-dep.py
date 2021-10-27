@@ -45,6 +45,9 @@ if __name__ == "__main__":
         dep_graph[module] = dict((k, None) for k in required_modules[module])
     missing_modules = reduce(set.union, required_modules.values(), set()) - available_modules
 
+    missing_modules |= {"l10n_it_account"}
+
+    #G = pgv.AGraph({"1": {"2": "color=green"},  "3": {"2": None}})
     G = pgv.AGraph(dep_graph, directed=True, rankdir="BT", ranksep=1.2, nodesep=0.3, ratio="fill")
     G.node_attr.update(color="black")
 
@@ -89,6 +92,23 @@ if __name__ == "__main__":
     xsb.config(command=canvas.xview)
     ysb.config(command=canvas.yview)
 
+    def do_zoom(event):
+        x = canvas.canvasx(event.x)
+        y = canvas.canvasy(event.y)
+        #factor = 1.001 ** event.delta
+        if event.num == 4:
+            factor = 1.1
+        else:
+            factor = 0.91
+        print("scale=", factor)
+        canvas.scale(tk.ALL, x, y, factor, factor)
+        canvas.config(scrollregion=canvas.bbox(tk.ALL))
+        xsb.config(command=canvas.xview)
+        ysb.config(command=canvas.yview)
+
+    canvas.bind("<MouseWheel>", do_zoom)
+    canvas.bind("<Button-4>", do_zoom)
+    canvas.bind("<Button-5>", do_zoom)
     canvas.bind('<ButtonPress-1>', lambda event: canvas.scan_mark(event.x, event.y))
     canvas.bind("<B1-Motion>", lambda event: canvas.scan_dragto(event.x, event.y, gain=1))
 
